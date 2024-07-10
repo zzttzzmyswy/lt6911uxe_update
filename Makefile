@@ -15,11 +15,17 @@ LIBS = -L.
 
 CFLAGS = -DGIT_COMMIT_HASH="\"$(GIT_COMMIT_HASH)\"" -DGIT_COMMIT_DATE="\"$(GIT_COMMIT_DATE)\"" $(INCLUDE) $(LIBS) -std=gnu99 -Wall -O0 -g 
 
+ifeq ($(ONLY_LT6911_I2C_TEST), 1)
+	CFLAGS += -DONLY_LT6911_I2C_TEST=1
+else
+	CFLAGS += -DONLY_LT6911_I2C_TEST=0
+endif
+
 SRCS = $(wildcard src/*.c)
 OBJS = $(patsubst %.c, %.o, $(SRCS))
 PREFIX = /usr/local/bin
 
-all: $(TARGET)
+all: clean $(TARGET)
 
 $(TARGET): $(OBJS)
 	$(info TARGET = $(TARGET))
@@ -31,4 +37,4 @@ $(TARGET): $(OBJS)
 clean:
 	rm -f $(OBJS) $(TARGET)
 
-.PHONY: clean all
+.PHONY: clean

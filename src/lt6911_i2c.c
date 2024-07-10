@@ -129,6 +129,7 @@ unsigned char lt6911_read_command_bytes(unsigned char offset_addr,
   return LT6911_OK;
 }
 
+#if ONLY_LT6911_I2C_TEST
 int main()
 {
   if(LT6911_ERROR == lt6911_i2c_infomation_init("/dev/i2c-1", 0x56)) {
@@ -141,3 +142,4 @@ int main()
   }
   return 0;
 }
+#endif
