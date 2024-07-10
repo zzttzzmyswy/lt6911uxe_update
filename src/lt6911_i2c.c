@@ -132,6 +132,7 @@ unsigned char lt6911_read_command_bytes(unsigned char offset_addr,
 #if ONLY_LT6911_I2C_TEST
 int main()
 {
+  log_info("lt6911_i2c_id_test, version: %s %s", GIT_COMMIT_HASH, GIT_COMMIT_DATE);
   if(LT6911_ERROR == lt6911_i2c_infomation_init("/dev/i2c-1", 0x56)) {
     log_error("lt6911_i2c_infomation_init error");
     return -1;
