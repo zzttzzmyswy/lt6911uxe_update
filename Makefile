@@ -39,7 +39,7 @@ $(TARGET): $(OBJS)
 else
 $(TARGET): $(OBJS)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
-	$(STRIP) -v --strip-debug --strip-unneeded $@*
+	$(STRIP) -v --strip-all $@*
 endif
 
 clean:
