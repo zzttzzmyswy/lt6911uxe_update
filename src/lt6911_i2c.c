@@ -8,7 +8,7 @@ static char lt6911_i2c_dev[50];
 static unsigned char lt6911_i2c_addr;
 static int i2c_dev_file;
 
-void lt6911_i2c_close(void) { close(lt6911_i2c_dev); }
+void lt6911_i2c_close(void) { close(i2c_dev_file); }
 
 unsigned char lt6911_i2c_open(void) {
   log_info("lt6911 i2c open start");
@@ -18,7 +18,7 @@ unsigned char lt6911_i2c_open(void) {
   }
   if (ioctl(i2c_dev_file, I2C_SLAVE, lt6911_i2c_addr) < 0) {
     log_error("Failed to acquire bus access and/or talk to slave");
-    close(lt6911_i2c_dev);
+    lt6911_i2c_close();
     return LT6911_ERROR;
   }
   return LT6911_OK;
