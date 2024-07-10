@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include "log.h"
 
 #define LT6911_WRITE_AS(__OFFSET_ADDR, __DATA, __ERROR_FUN)              \
   {                                                                      \

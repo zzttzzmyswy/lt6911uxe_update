@@ -1,7 +1,6 @@
-#include "lt6911_i2c.h"
 #include <linux/i2c-dev.h>
 #include <sys/ioctl.h>
-#include "log.h"
+#include "lt6911_i2c.h"
 
 /* init this infomation before use there api */
 static char lt6911_i2c_dev[50];
@@ -35,8 +34,7 @@ unsigned char lt6911_i2c_infomation_init(char* i2c_dev,
   strcpy(lt6911_i2c_dev, i2c_dev);
   lt6911_i2c_addr = i2c_addr;
   log_info("lt6911 i2c info: [%s:0x%X]", lt6911_i2c_dev, lt6911_i2c_addr);
-  if(LT6911_ERROR == lt6911_i2c_open())
-    return LT6911_ERROR;
+  if (LT6911_ERROR == lt6911_i2c_open()) return LT6911_ERROR;
   lt6911_i2c_close();
   return LT6911_OK;
 }
