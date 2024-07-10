@@ -39,13 +39,13 @@ unsigned char lt6911_write_firmware_to_flash(unsigned char* data,
   unsigned int step = 32;
   while (offset + step <= length) {
     // I2C to FIFO
-    LT6911_WRITE_AS(0x5e, 0xdf, lt6911_i2c_close);
-    LT6911_WRITE_AS(0x5a, 0x20, lt6911_i2c_close);
-    LT6911_WRITE_AS(0x5a, 0x00, lt6911_i2c_close);
-    LT6911_WRITE_AS(0x58, 0x21, lt6911_i2c_close);
+    LT6911_WRITE_AS(0x5e, 0xdf, lt6911_i2c_close());
+    LT6911_WRITE_AS(0x5a, 0x20, lt6911_i2c_close());
+    LT6911_WRITE_AS(0x5a, 0x00, lt6911_i2c_close());
+    LT6911_WRITE_AS(0x58, 0x21, lt6911_i2c_close());
 
     for (int i = 0; i < step; ++i) {
-      LT6911_WRITE_AS(0x59, data[offset + i], lt6911_i2c_close);
+      LT6911_WRITE_AS(0x59, data[offset + i], lt6911_i2c_close());
     }
 
     // TODO: FIFO to Flash
@@ -55,12 +55,12 @@ unsigned char lt6911_write_firmware_to_flash(unsigned char* data,
   }
   if (offset < length) {
     // I2C to FIFO
-    LT6911_WRITE_AS(0x5e, 0xdf, lt6911_i2c_close);
-    LT6911_WRITE_AS(0x5a, 0x20, lt6911_i2c_close);
-    LT6911_WRITE_AS(0x5a, 0x00, lt6911_i2c_close);
-    LT6911_WRITE_AS(0x58, 0x21, lt6911_i2c_close);
+    LT6911_WRITE_AS(0x5e, 0xdf, lt6911_i2c_close());
+    LT6911_WRITE_AS(0x5a, 0x20, lt6911_i2c_close());
+    LT6911_WRITE_AS(0x5a, 0x00, lt6911_i2c_close());
+    LT6911_WRITE_AS(0x58, 0x21, lt6911_i2c_close());
     for (int i = 0; i < (length - offset); ++i) {
-      LT6911_WRITE_AS(0x59, data[offset + i], lt6911_i2c_close);
+      LT6911_WRITE_AS(0x59, data[offset + i], lt6911_i2c_close());
     }
     // TODO: FIFO to Flash
   }

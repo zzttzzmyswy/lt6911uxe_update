@@ -44,13 +44,13 @@ unsigned char lt6911_id_check(void) {
   unsigned char id_l = 0, id_h = 0;
   log_info("start lt6911 id check");
   lt6911_i2c_open();
-  LT6911_WRITE_AS(0xff, 0xe0, lt6911_i2c_close);
-  LT6911_WRITE_AS(0xee, 0x01, lt6911_i2c_close);
-  LT6911_WRITE_AS(0xff, 0xe1, lt6911_i2c_close);
-  LT6911_READ_AS(0x00, 0x01, &id_h, lt6911_i2c_close);
-  LT6911_READ_AS(0x01, 0x01, &id_l, lt6911_i2c_close);
-  LT6911_WRITE_AS(0xff, 0xe0, lt6911_i2c_close);
-  LT6911_WRITE_AS(0xee, 0x00, lt6911_i2c_close);
+  LT6911_WRITE_AS(0xff, 0xe0, lt6911_i2c_close());
+  LT6911_WRITE_AS(0xee, 0x01, lt6911_i2c_close());
+  LT6911_WRITE_AS(0xff, 0xe1, lt6911_i2c_close());
+  LT6911_READ_AS(0x00, 0x01, &id_h, lt6911_i2c_close());
+  LT6911_READ_AS(0x01, 0x01, &id_l, lt6911_i2c_close());
+  LT6911_WRITE_AS(0xff, 0xe0, lt6911_i2c_close());
+  LT6911_WRITE_AS(0xee, 0x00, lt6911_i2c_close());
   if ((id_l != 0x00) || (id_h != 0x00)) {
     log_error("id check error, read id is [0x%X:0x%X]", id_l, id_h);
     lt6911_i2c_close();
@@ -127,4 +127,17 @@ unsigned char lt6911_read_command_bytes(unsigned char offset_addr,
       return LT6911_ERROR;
   }
   return LT6911_OK;
+}
+
+int main()
+{
+  if(LT6911_ERROR == lt6911_i2c_infomation_init("/dev/i2c-1", 0x56)) {
+    log_error("lt6911_i2c_infomation_init error");
+    return -1;
+  }
+  if(LT6911_ERROR == lt6911_id_check()) {
+    log_error("lt6911_id_check error");
+    return -1;
+  }
+  return 0;
 }

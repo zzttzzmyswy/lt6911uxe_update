@@ -13,22 +13,22 @@ GIT_COMMIT_DATE = $(shell git show -s --format=%ci HEAD)
 INCLUDE = -I. -I$(PWD)/include
 LIBS = -L. 
 
-CFLAGS = -DGIT_COMMIT_HASH="\"$(GIT_COMMIT_HASH)\"" -DGIT_COMMIT_DATE="\"$(GIT_COMMIT_DATE)\"" -std=gnu99 -Wall -O0 -g 
+CFLAGS = -DGIT_COMMIT_HASH="\"$(GIT_COMMIT_HASH)\"" -DGIT_COMMIT_DATE="\"$(GIT_COMMIT_DATE)\"" $(INCLUDE) $(LIBS) -std=gnu99 -Wall -O0 -g 
 
 SRCS = $(wildcard src/*.c)
-OBJS = $(SRCS:.c=.o)
+OBJS = $(patsubst %.c, %.o, $(SRCS))
 PREFIX = /usr/local/bin
 
 all: $(TARGET)
 
 $(TARGET): $(OBJS)
+	$(info TARGET = $(TARGET))
+	$(info OBJS = $(OBJS))
+	$(info SRCS = $(SRCS))
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
 # $(STRIP) -v --strip-debug --strip-unneeded $@*
-
-%.o: %.c
-	$(CC) $(CFLAGS) $(INCLUDE) $(LIBS) -c -o $@ $<
 
 clean:
 	rm -f $(OBJS) $(TARGET)
 
-.PHONY: all clean
+.PHONY: clean all
