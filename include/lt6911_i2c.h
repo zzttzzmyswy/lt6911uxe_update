@@ -5,6 +5,10 @@
 #include <unistd.h>
 #include "log.h"
 
+/* apis, Must check fun ret, Not thread safe, dep i2c-tools libi2c-dev */
+#define LT6911_OK 0
+#define LT6911_ERROR 1
+
 #define LT6911_WRITE_AS(__OFFSET_ADDR, __DATA, __ERROR_FUN)              \
   {                                                                      \
     if (LT6911_OK != lt6911_write_command_byte(__OFFSET_ADDR, __DATA)) { \
@@ -21,9 +25,7 @@
     }                                                                   \
   }
 
-/* apis, Must check fun ret, Not thread safe, dep i2c-tools libi2c-dev */
-#define LT6911_OK 0
-#define LT6911_ERROR 1
+#define MAX_FILE_LENGTH (1024 * 32 - 1)
 
 /*
  * lt6911 i2c file close
@@ -57,3 +59,19 @@ unsigned char lt6911_write_command_byte(unsigned char offset_addr,
 unsigned char lt6911_read_command_bytes(unsigned char offset_addr,
                                         unsigned char read_num,
                                         unsigned char* data);
+
+/**
+ * @brief write firmware to embedded flash and compare
+ *
+ * @param firmware_filename firmware file' s name
+ * @return unsigned char ErrorCode
+ */
+unsigned char lt6911_update_main_firmware(unsigned char* firmware_filename);
+
+/**
+ * @brief dump firmware to file
+ *
+ * @param filename file to save firmware
+ * @return unsigned char ErrorCode
+ */
+unsigned char lt6911_dump_firmware(unsigned char* filename);
