@@ -1,4 +1,3 @@
-#include "log.h"
 #include "lt6911_i2c.h"
 
 unsigned char lt6911_read_firmware_from_file(unsigned char* data,
