@@ -16,11 +16,6 @@ unsigned char lt6911_i2c_open(void) {
     log_error("Failed to open the i2c bus");
     return LT6911_ERROR;
   }
-  if (ioctl(i2c_dev_file, I2C_SLAVE, lt6911_i2c_addr) < 0) {
-    log_error("Failed to acquire bus access and/or talk to slave");
-    lt6911_i2c_close();
-    return LT6911_ERROR;
-  }
   return LT6911_OK;
 }
 
@@ -130,10 +125,16 @@ unsigned char lt6911_read_command_bytes(unsigned char offset_addr,
 }
 
 #if ONLY_LT6911_I2C_TEST
-int main()
+int main(int argc, char *argv[])
 {
+  unsigned char i2c_addr_input = 0x00;
+  i2c_addr_input = strtol(argv[2], NULL, 16);
+  if(argc != 3 || i2c_addr_input >= 0x80) {
+    log_error("Usage: %s <i2c dev file> <i2c addr, hex>", argv[0]);
+    return -1;
+  }
   log_info("lt6911_i2c_id_test, version: %s %s", GIT_COMMIT_HASH, GIT_COMMIT_DATE);
-  if(LT6911_ERROR == lt6911_i2c_infomation_init("/dev/i2c-1", 0x56)) {
+  if(LT6911_ERROR == lt6911_i2c_infomation_init(argv[1], i2c_addr_input)) {
     log_error("lt6911_i2c_infomation_init error");
     return -1;
   }

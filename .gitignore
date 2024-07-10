@@ -3,3 +3,4 @@
 *.so
 .vscode
 lt6911_update
+*.core
