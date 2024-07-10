@@ -40,6 +40,7 @@ else
 $(TARGET): $(OBJS)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
 	$(STRIP) -v --strip-all $@*
+	@if command -v upx >/dev/null 2>&1; then upx -9 --best $@*; fi
 endif
 
 clean:
