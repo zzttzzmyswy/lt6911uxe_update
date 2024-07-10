@@ -1,10 +1,10 @@
+#include <fcntl.h>
+#include <linux/i2c-dev.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <linux/i2c-dev.h>
-#include <sys/ioctl.h>
 #include <string.h>
+#include <sys/ioctl.h>
+#include <unistd.h>
 
 /* apis, Must check fun ret, Not thread safe, dep i2c-tools libi2c-dev */
 #define LT6911_OK 0
@@ -23,9 +23,12 @@ unsigned char lt6911_id_check(void);
 /*
  * write a byte by w command
  */
-unsigned char lt6911_write_command_byte(unsigned char offset_addr, unsigned char data);
+unsigned char lt6911_write_command_byte(unsigned char offset_addr,
+                                        unsigned char data);
 
 /*
  * write some bytes by r command
  */
-unsigned char lt6911_read_command_bytes(unsigned char offset_addr, unsigned char read_num, unsigned char* data);
+unsigned char lt6911_read_command_bytes(unsigned char offset_addr,
+                                        unsigned char read_num,
+                                        unsigned char* data);
