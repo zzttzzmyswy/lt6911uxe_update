@@ -10,15 +10,21 @@ STRIP = $(CROSS_COMPILE)strip
 GIT_COMMIT_HASH = $(shell git describe --tags)-$(shell git rev-parse HEAD)
 GIT_COMMIT_DATE = $(shell git show -s --format=%ci HEAD)
 
-INCLUDE = -I. -I$(PWD)/include
+INCLUDE = -I. -I./include
 LIBS = -L. 
 
-CFLAGS = -DGIT_COMMIT_HASH="\"$(GIT_COMMIT_HASH)\"" -DGIT_COMMIT_DATE="\"$(GIT_COMMIT_DATE)\"" $(INCLUDE) $(LIBS) -std=gnu99 -Wall -O0 -g 
+CFLAGS = -static -DGIT_COMMIT_HASH="\"$(GIT_COMMIT_HASH)\"" -DGIT_COMMIT_DATE="\"$(GIT_COMMIT_DATE)\"" $(INCLUDE) $(LIBS) -std=gnu99 
 
 ifeq ($(ONLY_LT6911_I2C_TEST), 1)
 	CFLAGS += -DONLY_LT6911_I2C_TEST=1
 else
 	CFLAGS += -DONLY_LT6911_I2C_TEST=0
+endif
+
+ifeq ($(DEBUG_MODE), 1)
+	CFLAGS +=  -Wall -O0 -g
+else
+	CFLAGS +=  -Wall -O3
 endif
 
 SRCS = $(wildcard src/*.c)
@@ -27,12 +33,14 @@ PREFIX = /usr/local/bin
 
 all: clean $(TARGET)
 
+ifeq ($(DEBUG_MODE), 1)
 $(TARGET): $(OBJS)
-	$(info TARGET = $(TARGET))
-	$(info OBJS = $(OBJS))
-	$(info SRCS = $(SRCS))
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
-# $(STRIP) -v --strip-debug --strip-unneeded $@*
+else
+$(TARGET): $(OBJS)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
+	$(STRIP) -v --strip-debug --strip-unneeded $@*
+endif
 
 clean:
 	rm -f $(OBJS) $(TARGET)
