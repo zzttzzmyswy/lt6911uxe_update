@@ -129,6 +129,8 @@ unsigned char lt6911_read_command_bytes(unsigned char offset_addr,
 int main(int argc, char* argv[]) {
   unsigned char i2c_addr_input = 0x00;
   char* debug_env = getenv("LT6911_UPDATE_DEBUG");
+  log_info("lt6911_i2c_id_test, version: %s %s", GIT_COMMIT_HASH,
+           GIT_COMMIT_DATE);
   if (debug_env != NULL) {
     log_info("LT6911_UPDATE_DEBUG value: %s", debug_env);
     log_set_level(LOG_TRACE);
@@ -136,13 +138,16 @@ int main(int argc, char* argv[]) {
     log_info("LT6911_UPDATE_DEBUG environment variable not set.");
     log_set_level(LOG_INFO);
   }
-  i2c_addr_input = strtol(argv[2], NULL, 16);
-  if (argc != 3 || i2c_addr_input >= 0x80) {
+  if (argc != 3) {
     log_error("Usage: %s <i2c dev file> <i2c addr, hex>", argv[0]);
     return -1;
   }
-  log_info("lt6911_i2c_id_test, version: %s %s", GIT_COMMIT_HASH,
-           GIT_COMMIT_DATE);
+  i2c_addr_input = strtol(argv[2], NULL, 16);
+  if (i2c_addr_input >= 0x80) {
+    log_error("Usage: %s <i2c dev file> <i2c addr, hex>", argv[0]);
+    log_error("Need: i2c addr(0x%X) < 0x80", i2c_addr_input);
+    return -1;
+  }
   if (LT6911_ERROR == lt6911_i2c_infomation_init(argv[1], i2c_addr_input)) {
     log_error("lt6911_i2c_infomation_init error");
     return -1;
