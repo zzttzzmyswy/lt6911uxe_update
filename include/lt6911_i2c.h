@@ -1,9 +1,7 @@
 #include <fcntl.h>
-#include <linux/i2c-dev.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/ioctl.h>
 #include <unistd.h>
 
 #define LT6911_WRITE_AS(__OFFSET_ADDR, __DATA, __ERROR_FUN)              \

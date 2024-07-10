@@ -1,5 +1,6 @@
 #include "lt6911_i2c.h"
-
+#include <linux/i2c-dev.h>
+#include <sys/ioctl.h>
 #include "log.h"
 
 /* init this infomation before use there api */
@@ -61,6 +62,7 @@ unsigned char lt6911_id_check(void) {
 unsigned char lt6911_write_command_byte(unsigned char offset_addr,
                                         unsigned char data) {
   log_info("start lt6911 write command, [0x%X:0x%X]", offset_addr, data);
+
   return LT6911_OK;
 }
 
