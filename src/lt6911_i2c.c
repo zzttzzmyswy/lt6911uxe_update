@@ -2,30 +2,14 @@
 
 #include "log.h"
 
-#define LT6911_WRITE_AS(__OFFSET_ADDR, __DATA, __ERROR_FUN)              \
-  {                                                                      \
-    if (LT6911_OK != lt6911_write_command_byte(__OFFSET_ADDR, __DATA)) { \
-      __ERROR_FUN;                                                       \
-      return LT6911_ERROR;                                               \
-    }                                                                    \
-  }
-#define LT6911_READ_AS(__OFFSET_ADDR, __READ_NUM, __DATA, __ERROR_FUN)  \
-  {                                                                     \
-    if (LT6911_OK !=                                                    \
-        lt6911_read_command_bytes(__OFFSET_ADDR, __READ_NUM, __DATA)) { \
-      __ERROR_FUN;                                                      \
-      return LT6911_ERROR;                                              \
-    }                                                                   \
-  }
-
 /* init this infomation before use there api */
 static char lt6911_i2c_dev[50];
 static unsigned char lt6911_i2c_addr;
 static int i2c_dev_file;
 
-static void lt6911_i2c_close(void) { close(lt6911_i2c_dev); }
+void lt6911_i2c_close(void) { close(lt6911_i2c_dev); }
 
-static unsigned char lt6911_i2c_open(void) {
+unsigned char lt6911_i2c_open(void) {
   log_info("lt6911 i2c open start");
   if ((i2c_dev_file = open(lt6911_i2c_dev, O_RDWR)) < 0) {
     log_error("Failed to open the i2c bus");
@@ -50,7 +34,10 @@ unsigned char lt6911_i2c_infomation_init(char* i2c_dev,
   strcpy(lt6911_i2c_dev, i2c_dev);
   lt6911_i2c_addr = i2c_addr;
   log_info("lt6911 i2c info: [%s:0x%X]", lt6911_i2c_dev, lt6911_i2c_addr);
-  return lt6911_i2c_open();
+  if(LT6911_ERROR == lt6911_i2c_open())
+    return LT6911_ERROR;
+  lt6911_i2c_close();
+  return LT6911_OK;
 }
 
 unsigned char lt6911_id_check(void) {

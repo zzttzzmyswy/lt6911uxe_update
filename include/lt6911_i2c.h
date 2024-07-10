@@ -6,9 +6,35 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 
+#define LT6911_WRITE_AS(__OFFSET_ADDR, __DATA, __ERROR_FUN)              \
+  {                                                                      \
+    if (LT6911_OK != lt6911_write_command_byte(__OFFSET_ADDR, __DATA)) { \
+      __ERROR_FUN;                                                       \
+      return LT6911_ERROR;                                               \
+    }                                                                    \
+  }
+#define LT6911_READ_AS(__OFFSET_ADDR, __READ_NUM, __DATA, __ERROR_FUN)  \
+  {                                                                     \
+    if (LT6911_OK !=                                                    \
+        lt6911_read_command_bytes(__OFFSET_ADDR, __READ_NUM, __DATA)) { \
+      __ERROR_FUN;                                                      \
+      return LT6911_ERROR;                                              \
+    }                                                                   \
+  }
+
 /* apis, Must check fun ret, Not thread safe, dep i2c-tools libi2c-dev */
 #define LT6911_OK 0
 #define LT6911_ERROR 1
+
+/*
+ * lt6911 i2c file close
+ */
+void lt6911_i2c_close(void);
+
+/*
+ * lt6911 i2c file open
+ */
+unsigned char lt6911_i2c_open(void);
 
 /*
  * init I2C infomation
