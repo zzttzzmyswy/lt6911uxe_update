@@ -2,7 +2,7 @@
 # Copyright (c) 2015 - 2020 DisplayLink (UK) Ltd.
 #
 
-TARGET = lt6911_update
+TARGET = lt6911uxe_update
 
 CC = $(CROSS_COMPILE)gcc
 STRIP = $(CROSS_COMPILE)strip

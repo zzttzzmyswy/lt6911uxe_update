@@ -1,4 +1,4 @@
-# lt6911_update
+# lt6911uxe_update
 
 ## 编译方式
 

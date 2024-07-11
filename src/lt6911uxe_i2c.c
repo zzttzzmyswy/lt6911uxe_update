@@ -1,4 +1,4 @@
-#include "lt6911_i2c.h"
+#include "lt6911uxe_i2c.h"
 
 #include <linux/i2c-dev.h>
 #include <linux/i2c.h>
@@ -8,6 +8,7 @@
 static char lt6911_i2c_dev[50];
 static unsigned char lt6911_i2c_addr;
 static int i2c_dev_file;
+static int i2c_dev_debug_flag;
 
 void lt6911_i2c_close(void) { close(i2c_dev_file); }
 
@@ -37,18 +38,18 @@ unsigned char lt6911_i2c_infomation_init(char* i2c_dev,
 }
 
 unsigned char lt6911_id_check(void) {
-  unsigned char id_l = 0, id_h = 0;
+  unsigned char id[2] = {0x00, 0x00};
   log_debug("start lt6911 id check");
   lt6911_i2c_open();
   LT6911_WRITE_AS(0xff, 0xe0, lt6911_i2c_close());
   LT6911_WRITE_AS(0xee, 0x01, lt6911_i2c_close());
   LT6911_WRITE_AS(0xff, 0xe1, lt6911_i2c_close());
-  LT6911_READ_AS(0x00, 0x01, &id_h, lt6911_i2c_close());
-  LT6911_READ_AS(0x01, 0x01, &id_l, lt6911_i2c_close());
+  LT6911_READ_AS(0x00, 0x01, id, lt6911_i2c_close());
+  LT6911_READ_AS(0x01, 0x01, id + 1, lt6911_i2c_close());
   LT6911_WRITE_AS(0xff, 0xe0, lt6911_i2c_close());
   LT6911_WRITE_AS(0xee, 0x00, lt6911_i2c_close());
-  if ((id_l != 0x00) || (id_h != 0x00)) {
-    log_error("id check error, read id is [0x%X:0x%X]", id_l, id_h);
+  if ((id[0] != 0x00) || (id[1] != 0x00)) {
+    log_error("id check error, read id is [0x%X:0x%X]", id[0], id[1]);
     lt6911_i2c_close();
     return LT6911_ERROR;
   }
@@ -122,6 +123,12 @@ unsigned char lt6911_read_command_bytes(unsigned char offset_addr,
     log_error("i2c ioctl error, ret: %d", ret);
     return LT6911_ERROR;
   }
+  if (i2c_dev_debug_flag == 1) {
+    log_debug("i2c read info:");
+    for (int i = 0; i < read_num; i++) {
+      log_debug("[0x%X] 0x%X", offset_addr + i, data[i]);
+    }
+  }
   return LT6911_OK;
 }
 
@@ -134,9 +141,11 @@ int main(int argc, char* argv[]) {
   if (debug_env != NULL) {
     log_info("LT6911_UPDATE_DEBUG value: %s", debug_env);
     log_set_level(LOG_TRACE);
+    i2c_dev_debug_flag = 1;
   } else {
     log_info("LT6911_UPDATE_DEBUG environment variable not set.");
     log_set_level(LOG_INFO);
+    i2c_dev_debug_flag = 0;
   }
   if (argc != 3) {
     log_error("Usage: %s <i2c dev file> <i2c addr, hex>", argv[0]);

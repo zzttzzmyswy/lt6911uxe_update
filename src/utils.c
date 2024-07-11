@@ -1,4 +1,4 @@
-#include "lt6911_i2c.h"
+#include "lt6911uxe_i2c.h"
 
 unsigned char lt6911_read_firmware_from_file(unsigned char* data,
                                              unsigned int* length,
