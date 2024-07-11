@@ -11,7 +11,7 @@
 
 #define LT6911_WRITE_AS(__OFFSET_ADDR, __DATA, __ERROR_FUN)              \
   {                                                                      \
-    if (LT6911_OK != lt6911_write_command_byte(__OFFSET_ADDR, __DATA)) { \
+    if (LT6911_OK != lt6911uxe_write_byte(__OFFSET_ADDR, __DATA)) { \
       __ERROR_FUN;                                                       \
       return LT6911_ERROR;                                               \
     }                                                                    \
@@ -19,7 +19,7 @@
 #define LT6911_READ_AS(__OFFSET_ADDR, __READ_NUM, __DATA, __ERROR_FUN)  \
   {                                                                     \
     if (LT6911_OK !=                                                    \
-        lt6911_read_command_bytes(__OFFSET_ADDR, __READ_NUM, __DATA)) { \
+        lt6911uxe_read_bytes(__OFFSET_ADDR, __READ_NUM, __DATA)) { \
       __ERROR_FUN;                                                      \
       return LT6911_ERROR;                                              \
     }                                                                   \
@@ -28,35 +28,35 @@
 #define MAX_FILE_LENGTH (1024 * 32 - 1)
 
 /*
- * lt6911 i2c file close
+ * lt6911uxe i2c file close
  */
-void lt6911_i2c_close(void);
+void lt6911uxe_i2c_close(void);
 
 /*
- * lt6911 i2c file open
+ * lt6911uxe i2c file open
  */
-unsigned char lt6911_i2c_open(void);
+unsigned char lt6911uxe_i2c_open(void);
 
 /*
  * init I2C infomation
  */
-unsigned char lt6911_i2c_infomation_init(char* i2c_dev, unsigned char i2c_addr);
+unsigned char lt6911uxe_i2c_infomation_init(char* i2c_dev, unsigned char i2c_addr);
 
 /*
- * check LT6911 CHIP ID
+ * check lt6911uxe CHIP ID
  */
-unsigned char lt6911_id_check(void);
+unsigned char lt6911uxe_id_check(void);
 
 /*
  * write a byte by w command
  */
-unsigned char lt6911_write_command_byte(unsigned char offset_addr,
+unsigned char lt6911uxe_write_byte(unsigned char offset_addr,
                                         unsigned char data);
 
 /*
  * write some bytes by r command
  */
-unsigned char lt6911_read_command_bytes(unsigned char offset_addr,
+unsigned char lt6911uxe_read_bytes(unsigned char offset_addr,
                                         unsigned char read_num,
                                         unsigned char* data);
 
@@ -66,7 +66,7 @@ unsigned char lt6911_read_command_bytes(unsigned char offset_addr,
  * @param firmware_filename firmware file' s name
  * @return unsigned char ErrorCode
  */
-unsigned char lt6911_update_main_firmware(unsigned char* firmware_filename);
+unsigned char lt6911uxe_update_main_firmware(unsigned char* firmware_filename);
 
 /**
  * @brief dump firmware to file
@@ -74,4 +74,4 @@ unsigned char lt6911_update_main_firmware(unsigned char* firmware_filename);
  * @param filename file to save firmware
  * @return unsigned char ErrorCode
  */
-unsigned char lt6911_dump_firmware(unsigned char* filename);
+unsigned char lt6911uxe_dump_firmware(unsigned char* filename);
