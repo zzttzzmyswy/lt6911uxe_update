@@ -244,6 +244,7 @@ unsigned char lt6911uxe_dump_firmware(unsigned char* filename) {
 
 enum ctrlType { UNKNOWN = 0, WRITE, DUMP };
 
+#if !ONLY_LT6911_I2C_TEST
 int main(int argc, char* argv[]) {
   unsigned char i2c_addr_input = 0x00;
   char* debug_env = getenv("LT6911_UPDATE_DEBUG");
@@ -303,3 +304,4 @@ int main(int argc, char* argv[]) {
 
   return 0;
 }
+#endif
