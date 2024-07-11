@@ -25,7 +25,7 @@
     }                                                                   \
   }
 
-#define MAX_FILE_LENGTH (1024 * 32 - 1)
+#define MAX_FILE_LENGTH (1024 * 32)
 
 /*
  * lt6911uxe i2c file close

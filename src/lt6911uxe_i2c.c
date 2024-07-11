@@ -8,7 +8,6 @@
 static char lt6911uxe_i2c_dev[50];
 static unsigned char lt6911uxe_i2c_addr;
 static int lt6911uxe_i2c_dev_file;
-static int lt6911uxe_i2c_dev_debug_flag;
 static int lt6911uxe_i2c_fun_cmd_enable = 0;
 
 void lt6911uxe_i2c_close(void) { close(lt6911uxe_i2c_dev_file); }
@@ -23,7 +22,7 @@ unsigned char lt6911uxe_i2c_open(void) {
 }
 
 unsigned char lt6911uxe_i2c_infomation_init(char* i2c_dev,
-                                         unsigned char i2c_addr) {
+                                            unsigned char i2c_addr) {
   log_debug("start i2c info init, [%s:0x%X]", i2c_dev, i2c_addr);
   if (strlen(i2c_dev) > 50) {
     log_error("i2c dev name to long");
@@ -34,7 +33,8 @@ unsigned char lt6911uxe_i2c_infomation_init(char* i2c_dev,
   lt6911uxe_i2c_addr = i2c_addr;
   if (LT6911_ERROR == lt6911uxe_i2c_open()) return LT6911_ERROR;
   lt6911uxe_i2c_close();
-  log_info("lt6911uxe i2c info: [%s:0x%X]", lt6911uxe_i2c_dev, lt6911uxe_i2c_addr);
+  log_info("lt6911uxe i2c info: [%s:0x%X]", lt6911uxe_i2c_dev,
+           lt6911uxe_i2c_addr);
   return lt6911uxe_id_check();
 }
 
@@ -59,7 +59,7 @@ unsigned char lt6911uxe_id_check(void) {
 }
 
 unsigned char lt6911uxe_write_byte(unsigned char offset_addr,
-                                        unsigned char data) {
+                                   unsigned char data) {
   log_debug("start lt6911uxe write command, [0x%X:0x%X]", offset_addr, data);
   struct i2c_rdwr_ioctl_data ioctl_data;
   struct i2c_msg msg;
@@ -86,15 +86,13 @@ unsigned char lt6911uxe_write_byte(unsigned char offset_addr,
     log_error("i2c ioctl error, ret: %d", ret);
     return LT6911_ERROR;
   }
-  if (lt6911uxe_i2c_dev_debug_flag == 1) {
-    log_debug("i2c write [0x%X] 0x%X", offset_addr, data);
-  }
+  log_debug("i2c write [0x%X] 0x%X", offset_addr, data);
   return LT6911_OK;
 }
 
 unsigned char lt6911uxe_read_bytes(unsigned char offset_addr,
-                                        unsigned char read_num,
-                                        unsigned char* data) {
+                                   unsigned char read_num,
+                                   unsigned char* data) {
   log_debug("start lt6911uxe read command, [0x%X:0x%X:0x%X]", offset_addr,
             read_num, data);
   if (read_num > 50) {
@@ -133,7 +131,7 @@ unsigned char lt6911uxe_read_bytes(unsigned char offset_addr,
     log_error("i2c ioctl error, ret: %d", ret);
     return LT6911_ERROR;
   }
-  if (lt6911uxe_i2c_dev_debug_flag == 1) {
+  if (log_get_level() < LOG_DEBUG) {
     log_debug("i2c read info:");
     for (int i = 0; i < read_num; i++) {
       log_debug("[0x%X] 0x%X", offset_addr + i, data[i]);
@@ -151,11 +149,9 @@ int main(int argc, char* argv[]) {
   if (debug_env != NULL) {
     log_info("LT6911_UPDATE_DEBUG value: %s", debug_env);
     log_set_level(LOG_TRACE);
-    lt6911uxe_i2c_dev_debug_flag = 1;
   } else {
     log_info("LT6911_UPDATE_DEBUG environment variable not set.");
     log_set_level(LOG_INFO);
-    lt6911uxe_i2c_dev_debug_flag = 0;
   }
   if (argc != 3) {
     log_error("Usage: %s <i2c dev file> <i2c addr, hex>", argv[0]);
