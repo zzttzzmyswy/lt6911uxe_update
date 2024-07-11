@@ -45,10 +45,7 @@ unsigned char lt6911uxe_id_check(void) {
   LT6911_WRITE_AS(0xff, 0xe0, lt6911uxe_i2c_close());
   LT6911_WRITE_AS(0xee, 0x01, lt6911uxe_i2c_close());
   LT6911_WRITE_AS(0xff, 0xe1, lt6911uxe_i2c_close());
-  /* chip ID register high byte */
-  LT6911_READ_AS(0x00, 0x01, id, lt6911uxe_i2c_close());
-  /* chip ID register low byte */
-  LT6911_READ_AS(0x01, 0x01, id + 1, lt6911uxe_i2c_close());
+  LT6911_READ_AS(0x00, 0x02, id, lt6911uxe_i2c_close());
   LT6911_WRITE_AS(0xff, 0xe0, lt6911uxe_i2c_close());
   LT6911_WRITE_AS(0xee, 0x00, lt6911uxe_i2c_close());
   if ((id[0] != 0x21) || (id[1] != 0x02)) {
