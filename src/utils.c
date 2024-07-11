@@ -15,6 +15,7 @@ static unsigned char calculate_crc8(unsigned char* data, size_t length) {
       }
     }
   }
+  log_info("crc ret 0x%X", crc);
   return crc;
 }
 
@@ -35,6 +36,7 @@ unsigned char lt6911_read_firmware_from_file(unsigned char* data,
   }
   fseek(fp, 0L, SEEK_END);
   file_size = ftell(fp);
+  fseek(fp, 0L, 0);
   if (file_size > MAX_FILE_LENGTH) {
     log_error("file %s too large", filename);
     return LT6911_ERROR;
@@ -59,6 +61,10 @@ unsigned char lt6911_write_firmware_to_flash(unsigned char* data,
   unsigned int step = 32;
   unsigned int address = 0x000000;
 
+  if(LT6911_ERROR == lt6911uxe_i2c_open()) {
+    log_error("lt6911uxe_i2c_open error");
+    return LT6911_ERROR;
+  }
   // Configure Parameters
   LT6911_WRITE_AS(0xff, 0xe0, lt6911uxe_i2c_close());
   LT6911_WRITE_AS(0xee, 0x01, lt6911uxe_i2c_close());
@@ -78,9 +84,10 @@ unsigned char lt6911_write_firmware_to_flash(unsigned char* data,
   LT6911_WRITE_AS(0x5a, 0x01, lt6911uxe_i2c_close());
   LT6911_WRITE_AS(0x5a, 0x00, lt6911uxe_i2c_close());
 
-  usleep(500);
+  usleep(500 * 1000);
 
   while (1) {
+    log_info("write FIFO to flash 0x%X", address);
     // WREN
     LT6911_WRITE_AS(0xff, 0xe1, lt6911uxe_i2c_close());
     LT6911_WRITE_AS(0x03, 0x3f, lt6911uxe_i2c_close());
@@ -104,6 +111,7 @@ unsigned char lt6911_write_firmware_to_flash(unsigned char* data,
     LT6911_WRITE_AS(0x5d, (address & 0x0000FF), lt6911uxe_i2c_close());
     LT6911_WRITE_AS(0x5a, 0x10, lt6911uxe_i2c_close());
     LT6911_WRITE_AS(0x5a, 0x00, lt6911uxe_i2c_close());
+    usleep(10 * 1000);
 
     if (address + step < length) {
       // update offset and address
@@ -117,6 +125,8 @@ unsigned char lt6911_write_firmware_to_flash(unsigned char* data,
   // WRDI
   LT6911_WRITE_AS(0x5a, 0x08, lt6911uxe_i2c_close());
   LT6911_WRITE_AS(0x5a, 0x00, lt6911uxe_i2c_close());
+  lt6911uxe_i2c_close();
+  log_info("lt6911_write_firmware_to_flash ok");
 
   return LT6911_OK;
 }
@@ -126,7 +136,10 @@ unsigned char lt6911_read_firmware_from_flash(unsigned char* data,
   unsigned int offset = 0;
   unsigned int step = 32;
   unsigned int address = 0x000000;
-
+  if(LT6911_ERROR == lt6911uxe_i2c_open()) {
+    log_error("lt6911uxe_i2c_open error");
+    return LT6911_ERROR;
+  }
   // Configure Parameters
   LT6911_WRITE_AS(0xff, 0xe0, lt6911uxe_i2c_close());
   LT6911_WRITE_AS(0xee, 0x01, lt6911uxe_i2c_close());
@@ -138,6 +151,7 @@ unsigned char lt6911_read_firmware_from_flash(unsigned char* data,
   LT6911_WRITE_AS(0x58, 0x21, lt6911uxe_i2c_close());
 
   while (1) {
+    log_info("read flash 0x%X to FIFO", address);
     // Flash to FIFO
     LT6911_WRITE_AS(0x5e, 0x5f, lt6911uxe_i2c_close());
     LT6911_WRITE_AS(0x5a, 0x20, lt6911uxe_i2c_close());
@@ -164,6 +178,8 @@ unsigned char lt6911_read_firmware_from_flash(unsigned char* data,
   // WRDI
   LT6911_WRITE_AS(0x5a, 0x08, lt6911uxe_i2c_close());
   LT6911_WRITE_AS(0x5a, 0x00, lt6911uxe_i2c_close());
+  lt6911uxe_i2c_close();
+  log_info("lt6911_read_firmware_from_flash ok");
 
   return LT6911_OK;
 }
@@ -177,11 +193,13 @@ unsigned char lt6911_compare_firmware(unsigned char* firmware,
   }
 
   for (unsigned int i = 0; i < length; ++i) {
+    log_debug("compare [0x%X] 0x%X <-> 0x%X", i, firmware[i], data[i]);
     if (firmware[i] != data[i]) {
       log_error("compare failed");
       return LT6911_ERROR;
     }
   }
+  log_info("lt6911_compare_firmware ok");
   return LT6911_OK;
 }
 
@@ -215,12 +233,13 @@ unsigned char lt6911uxe_update_main_firmware(unsigned char* firmware_filename) {
   unsigned char errorCode = LT6911_OK;
   do {
     unsigned char data[MAX_FILE_LENGTH];
+    unsigned char read_data[MAX_FILE_LENGTH];
     memset(data, 0xFF, MAX_FILE_LENGTH);
+    memset(read_data, 0xFF, MAX_FILE_LENGTH);
     errorCode = lt6911_read_firmware_from_file(data, firmware_filename);
     if (errorCode != LT6911_OK) break;
     errorCode = lt6911_write_firmware_to_flash(data, MAX_FILE_LENGTH);
     if (errorCode != LT6911_OK) break;
-    unsigned char read_data[MAX_FILE_LENGTH];
     errorCode = lt6911_read_firmware_from_flash(read_data, MAX_FILE_LENGTH);
     if (errorCode != LT6911_OK) break;
     errorCode = lt6911_compare_firmware(data, read_data, MAX_FILE_LENGTH);
@@ -266,7 +285,10 @@ int main(int argc, char* argv[]) {
   }
   i2c_addr_input = strtol(argv[2], NULL, 16);
   if (i2c_addr_input >= 0x80) {
-    log_error("Usage: %s <i2c dev file> <i2c addr, hex>", argv[0]);
+    log_error(
+        "Usage: %s <i2c dev file> <i2c addr, hex> <update or dump> <firmware "
+        "bin filename or dump filename>",
+        argv[0]);
     log_error("Need: i2c addr(0x%X) < 0x80", i2c_addr_input);
     return -1;
   }
