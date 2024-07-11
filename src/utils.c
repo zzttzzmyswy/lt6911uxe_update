@@ -19,8 +19,8 @@ static unsigned char calculate_crc8(unsigned char* data, size_t length) {
   return crc;
 }
 
-unsigned char lt6911_read_firmware_from_file(unsigned char* data,
-                                             char* filename) {
+unsigned char lt6911uxe_read_firmware_from_file(unsigned char* data,
+                                                char* filename) {
   FILE* fp;
   long file_size = 0;
   size_t bytesRead = 0;
@@ -55,13 +55,13 @@ unsigned char lt6911_read_firmware_from_file(unsigned char* data,
   return LT6911_OK;
 }
 
-unsigned char lt6911_write_firmware_to_flash(unsigned char* data,
-                                             unsigned int length) {
+unsigned char lt6911uxe_write_firmware_to_flash(unsigned char* data,
+                                                unsigned int length) {
   unsigned int offset = 0;
   unsigned int step = 32;
   unsigned int address = 0x000000;
 
-  if(LT6911_ERROR == lt6911uxe_i2c_open()) {
+  if (LT6911_ERROR == lt6911uxe_i2c_open()) {
     log_error("lt6911uxe_i2c_open error");
     return LT6911_ERROR;
   }
@@ -126,17 +126,17 @@ unsigned char lt6911_write_firmware_to_flash(unsigned char* data,
   LT6911_WRITE_AS(0x5a, 0x08, lt6911uxe_i2c_close());
   LT6911_WRITE_AS(0x5a, 0x00, lt6911uxe_i2c_close());
   lt6911uxe_i2c_close();
-  log_info("lt6911_write_firmware_to_flash ok");
+  log_info("lt6911uxe_write_firmware_to_flash ok");
 
   return LT6911_OK;
 }
 
-unsigned char lt6911_read_firmware_from_flash(unsigned char* data,
-                                              unsigned int length) {
+unsigned char lt6911uxe_read_firmware_from_flash(unsigned char* data,
+                                                 unsigned int length) {
   unsigned int offset = 0;
   unsigned int step = 32;
   unsigned int address = 0x000000;
-  if(LT6911_ERROR == lt6911uxe_i2c_open()) {
+  if (LT6911_ERROR == lt6911uxe_i2c_open()) {
     log_error("lt6911uxe_i2c_open error");
     return LT6911_ERROR;
   }
@@ -179,14 +179,14 @@ unsigned char lt6911_read_firmware_from_flash(unsigned char* data,
   LT6911_WRITE_AS(0x5a, 0x08, lt6911uxe_i2c_close());
   LT6911_WRITE_AS(0x5a, 0x00, lt6911uxe_i2c_close());
   lt6911uxe_i2c_close();
-  log_info("lt6911_read_firmware_from_flash ok");
+  log_info("lt6911uxe_read_firmware_from_flash ok");
 
   return LT6911_OK;
 }
 
-unsigned char lt6911_compare_firmware(unsigned char* firmware,
-                                      unsigned char* data,
-                                      unsigned int length) {
+unsigned char lt6911uxe_compare_firmware(unsigned char* firmware,
+                                         unsigned char* data,
+                                         unsigned int length) {
   if (firmware == NULL || data == NULL) {
     log_error("input to be compared is empty");
     return LT6911_ERROR;
@@ -199,13 +199,13 @@ unsigned char lt6911_compare_firmware(unsigned char* firmware,
       return LT6911_ERROR;
     }
   }
-  log_info("lt6911_compare_firmware ok");
+  log_info("lt6911uxe_compare_firmware ok");
   return LT6911_OK;
 }
 
-unsigned char lt6911_write_firmware_to_file(unsigned char* data,
-                                            unsigned int length,
-                                            char* filename) {
+unsigned char lt6911uxe_write_firmware_to_file(unsigned char* data,
+                                               unsigned int length,
+                                               char* filename) {
   if (data == NULL || filename == NULL) {
     log_error("empty buffer or filename, [%s]", filename);
     return LT6911_ERROR;
@@ -236,13 +236,13 @@ unsigned char lt6911uxe_update_main_firmware(char* firmware_filename) {
     unsigned char read_data[MAX_FILE_LENGTH];
     memset(data, 0xFF, MAX_FILE_LENGTH);
     memset(read_data, 0xFF, MAX_FILE_LENGTH);
-    errorCode = lt6911_read_firmware_from_file(data, firmware_filename);
+    errorCode = lt6911uxe_read_firmware_from_file(data, firmware_filename);
     if (errorCode != LT6911_OK) break;
-    errorCode = lt6911_write_firmware_to_flash(data, MAX_FILE_LENGTH);
+    errorCode = lt6911uxe_write_firmware_to_flash(data, MAX_FILE_LENGTH);
     if (errorCode != LT6911_OK) break;
-    errorCode = lt6911_read_firmware_from_flash(read_data, MAX_FILE_LENGTH);
+    errorCode = lt6911uxe_read_firmware_from_flash(read_data, MAX_FILE_LENGTH);
     if (errorCode != LT6911_OK) break;
-    errorCode = lt6911_compare_firmware(data, read_data, MAX_FILE_LENGTH);
+    errorCode = lt6911uxe_compare_firmware(data, read_data, MAX_FILE_LENGTH);
     if (errorCode != LT6911_OK) break;
   } while (false);
   return errorCode;
@@ -253,9 +253,9 @@ unsigned char lt6911uxe_dump_firmware(char* filename) {
   do {
     unsigned char data[MAX_FILE_LENGTH];
     unsigned int length = MAX_FILE_LENGTH;
-    errorCode = lt6911_read_firmware_from_flash(data, length);
+    errorCode = lt6911uxe_read_firmware_from_flash(data, length);
     if (errorCode != LT6911_OK) break;
-    errorCode = lt6911_write_firmware_to_file(data, length, filename);
+    errorCode = lt6911uxe_write_firmware_to_file(data, length, filename);
     if (errorCode != LT6911_OK) break;
   } while (false);
   return errorCode;
