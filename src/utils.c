@@ -37,38 +37,116 @@ unsigned char lt6911_write_firmware_to_flash(unsigned char* data,
                                              unsigned int length) {
   unsigned int offset = 0;
   unsigned int step = 32;
-  while (offset + step <= length) {
+  unsigned int address = 0x000000;
+
+  // Configure Parameters
+  LT6911_WRITE_AS(0xff, 0xe0, lt6911_i2c_close());
+  LT6911_WRITE_AS(0xee, 0x01, lt6911_i2c_close());
+  LT6911_WRITE_AS(0x5e, 0xc1, lt6911_i2c_close());
+  LT6911_WRITE_AS(0x58, 0x00, lt6911_i2c_close());
+  LT6911_WRITE_AS(0x59, 0x50, lt6911_i2c_close());
+  LT6911_WRITE_AS(0x5a, 0x10, lt6911_i2c_close());
+  LT6911_WRITE_AS(0x5a, 0x00, lt6911_i2c_close());
+  LT6911_WRITE_AS(0x58, 0x21, lt6911_i2c_close());
+
+  // Block Erase
+  LT6911_WRITE_AS(0x5a, 0x04, lt6911_i2c_close());
+  LT6911_WRITE_AS(0x5a, 0x00, lt6911_i2c_close());
+  LT6911_WRITE_AS(0x5b, 0x00, lt6911_i2c_close());
+  LT6911_WRITE_AS(0x5c, 0x00, lt6911_i2c_close());
+  LT6911_WRITE_AS(0x5d, 0x00, lt6911_i2c_close());
+  LT6911_WRITE_AS(0x5a, 0x01, lt6911_i2c_close());
+  LT6911_WRITE_AS(0x5a, 0x00, lt6911_i2c_close());
+
+  usleep(500);
+
+  while (1) {
+    // WREN
+    LT6911_WRITE_AS(0xff, 0xe1, lt6911_i2c_close());
+    LT6911_WRITE_AS(0x03, 0x3f, lt6911_i2c_close());
+    LT6911_WRITE_AS(0x03, 0xff, lt6911_i2c_close());
+    LT6911_WRITE_AS(0xff, 0xe0, lt6911_i2c_close());
+    LT6911_WRITE_AS(0x5a, 0x04, lt6911_i2c_close());
+    LT6911_WRITE_AS(0x5a, 0x00, lt6911_i2c_close());
+
     // I2C to FIFO
     LT6911_WRITE_AS(0x5e, 0xdf, lt6911_i2c_close());
     LT6911_WRITE_AS(0x5a, 0x20, lt6911_i2c_close());
     LT6911_WRITE_AS(0x5a, 0x00, lt6911_i2c_close());
     LT6911_WRITE_AS(0x58, 0x21, lt6911_i2c_close());
-
     for (int i = 0; i < step; ++i) {
       LT6911_WRITE_AS(0x59, data[offset + i], lt6911_i2c_close());
     }
 
-    // TODO: FIFO to Flash
-
-    // update offset
-    offset += step;
-  }
-  if (offset < length) {
-    // I2C to FIFO
-    LT6911_WRITE_AS(0x5e, 0xdf, lt6911_i2c_close());
-    LT6911_WRITE_AS(0x5a, 0x20, lt6911_i2c_close());
+    // FIFO to Flash
+    LT6911_WRITE_AS(0x5b, ((address & 0x110000) >> 4), lt6911_i2c_close());
+    LT6911_WRITE_AS(0x5c, ((address & 0x001100) >> 2), lt6911_i2c_close());
+    LT6911_WRITE_AS(0x5d, (address & 0x000011), lt6911_i2c_close());
+    LT6911_WRITE_AS(0x5a, 0x10, lt6911_i2c_close());
     LT6911_WRITE_AS(0x5a, 0x00, lt6911_i2c_close());
-    LT6911_WRITE_AS(0x58, 0x21, lt6911_i2c_close());
-    for (int i = 0; i < (length - offset); ++i) {
-      LT6911_WRITE_AS(0x59, data[offset + i], lt6911_i2c_close());
+
+    if (address + step < length) {
+      // update offset and address
+      offset += step;
+      address += step;
+      continue;
     }
-    // TODO: FIFO to Flash
+    break;
   }
+
+  // WRDI
+  LT6911_WRITE_AS(0x5a, 0x08, lt6911_i2c_close());
+  LT6911_WRITE_AS(0x5a, 0x00, lt6911_i2c_close());
+
   return LT6911_OK;
 }
 
 unsigned char lt6911_read_firmware_from_flash(unsigned char* data,
-                                              unsigned int length) {}
+                                              unsigned int length) {
+  unsigned int offset = 0;
+  unsigned int step = 32;
+  unsigned int address = 0x000000;
+
+  // Configure Parameters
+  LT6911_WRITE_AS(0xff, 0xe0, lt6911_i2c_close());
+  LT6911_WRITE_AS(0xee, 0x01, lt6911_i2c_close());
+  LT6911_WRITE_AS(0x5e, 0xc1, lt6911_i2c_close());
+  LT6911_WRITE_AS(0x58, 0x00, lt6911_i2c_close());
+  LT6911_WRITE_AS(0x59, 0x50, lt6911_i2c_close());
+  LT6911_WRITE_AS(0x5a, 0x10, lt6911_i2c_close());
+  LT6911_WRITE_AS(0x5a, 0x00, lt6911_i2c_close());
+  LT6911_WRITE_AS(0x58, 0x21, lt6911_i2c_close());
+
+  while (1) {
+    // Flash to FIFO
+    LT6911_WRITE_AS(0x5e, 0x5f, lt6911_i2c_close());
+    LT6911_WRITE_AS(0x5a, 0x20, lt6911_i2c_close());
+    LT6911_WRITE_AS(0x5a, 0x00, lt6911_i2c_close());
+
+    LT6911_WRITE_AS(0x5b, ((address & 0x110000) >> 4), lt6911_i2c_close());
+    LT6911_WRITE_AS(0x5c, ((address & 0x001100) >> 2), lt6911_i2c_close());
+    LT6911_WRITE_AS(0x5d, (address & 0x000011), lt6911_i2c_close());
+
+    LT6911_WRITE_AS(0x5a, 0x10, lt6911_i2c_close());
+    LT6911_WRITE_AS(0x5a, 0x00, lt6911_i2c_close());
+
+    //  FIFO to I2C
+    LT6911_WRITE_AS(0x58, 0x21, lt6911_i2c_close());
+    LT6911_READ_AS(0x5f, 0x20, &data[offset], lt6911_i2c_close());
+
+    if (address + step < length) {
+      address += step;
+      offset += step;
+      continue;
+    }
+    break;
+  }
+  // WRDI
+  LT6911_WRITE_AS(0x5a, 0x08, lt6911_i2c_close());
+  LT6911_WRITE_AS(0x5a, 0x00, lt6911_i2c_close());
+
+  return LT6911_OK;
+}
 
 unsigned char lt6911_compare_firmware(unsigned char* firmware,
                                       unsigned char* data,
