@@ -242,6 +242,8 @@ unsigned char lt6911uxe_dump_firmware(unsigned char* filename) {
   return errorCode;
 }
 
+enum ctrlType { UNKNOWN = 0, WRITE, DUMP };
+
 int main(int argc, char* argv[]) {
   unsigned char i2c_addr_input = 0x00;
   char* debug_env = getenv("LT6911_UPDATE_DEBUG");
@@ -254,8 +256,11 @@ int main(int argc, char* argv[]) {
     log_info("LT6911_UPDATE_DEBUG environment variable not set.");
     log_set_level(LOG_INFO);
   }
-  if (argc != 3) {
-    log_error("Usage: %s <i2c dev file> <i2c addr, hex>", argv[0]);
+  if (argc != 5) {
+    log_error(
+        "Usage: %s <i2c dev file> <i2c addr, hex> <update or dump> <firmware "
+        "bin filename or dump filename>",
+        argv[0]);
     return -1;
   }
   i2c_addr_input = strtol(argv[2], NULL, 16);
@@ -268,5 +273,33 @@ int main(int argc, char* argv[]) {
     log_error("lt6911uxe_i2c_infomation_init error");
     return -1;
   }
+
+  enum ctrlType ctype = UNKNOWN;
+
+  if (strncmp("update", argv[3], strlen("update")) == 0) {
+    ctype = WRITE;
+  } else if (strncmp("dump", argv[3], strlen("dump")) == 0) {
+    ctype = DUMP;
+  }
+
+  if (ctype == WRITE) {
+    unsigned char* filename = argv[4];
+    unsigned char ret = lt6911uxe_update_main_firmware(filename);
+    if (ret == LT6911_ERROR) {
+      log_error("update main firmware failed");
+      return -1;
+    }
+  } else if (ctype == DUMP) {
+    unsigned char* filename = argv[4];
+    unsigned char ret = lt6911uxe_dump_firmware(filename);
+    if (ret == LT6911_ERROR) {
+      log_error("dump main firmware failed");
+      return -1;
+    }
+  } else {
+    log_error("unknown parameters");
+    return -1;
+  }
+
   return 0;
 }
