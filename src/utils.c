@@ -20,7 +20,7 @@ static unsigned char calculate_crc8(unsigned char* data, size_t length) {
 }
 
 unsigned char lt6911_read_firmware_from_file(unsigned char* data,
-                                             unsigned char* filename) {
+                                             char* filename) {
   FILE* fp;
   long file_size = 0;
   size_t bytesRead = 0;
@@ -205,7 +205,7 @@ unsigned char lt6911_compare_firmware(unsigned char* firmware,
 
 unsigned char lt6911_write_firmware_to_file(unsigned char* data,
                                             unsigned int length,
-                                            unsigned char* filename) {
+                                            char* filename) {
   if (data == NULL || filename == NULL) {
     log_error("empty buffer or filename, [%s]", filename);
     return LT6911_ERROR;
@@ -229,7 +229,7 @@ unsigned char lt6911_write_firmware_to_file(unsigned char* data,
   return LT6911_OK;
 }
 
-unsigned char lt6911uxe_update_main_firmware(unsigned char* firmware_filename) {
+unsigned char lt6911uxe_update_main_firmware(char* firmware_filename) {
   unsigned char errorCode = LT6911_OK;
   do {
     unsigned char data[MAX_FILE_LENGTH];
@@ -248,7 +248,7 @@ unsigned char lt6911uxe_update_main_firmware(unsigned char* firmware_filename) {
   return errorCode;
 }
 
-unsigned char lt6911uxe_dump_firmware(unsigned char* filename) {
+unsigned char lt6911uxe_dump_firmware(char* filename) {
   unsigned char errorCode = LT6911_OK;
   do {
     unsigned char data[MAX_FILE_LENGTH];
@@ -306,15 +306,13 @@ int main(int argc, char* argv[]) {
   }
 
   if (ctype == WRITE) {
-    unsigned char* filename = argv[4];
-    unsigned char ret = lt6911uxe_update_main_firmware(filename);
+    unsigned char ret = lt6911uxe_update_main_firmware(argv[4]);
     if (ret == LT6911_ERROR) {
       log_error("update main firmware failed");
       return -1;
     }
   } else if (ctype == DUMP) {
-    unsigned char* filename = argv[4];
-    unsigned char ret = lt6911uxe_dump_firmware(filename);
+    unsigned char ret = lt6911uxe_dump_firmware(argv[4]);
     if (ret == LT6911_ERROR) {
       log_error("dump main firmware failed");
       return -1;

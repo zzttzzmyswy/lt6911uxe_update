@@ -66,7 +66,7 @@ unsigned char lt6911uxe_read_bytes(unsigned char offset_addr,
  * @param firmware_filename firmware file' s name
  * @return unsigned char ErrorCode
  */
-unsigned char lt6911uxe_update_main_firmware(unsigned char* firmware_filename);
+unsigned char lt6911uxe_update_main_firmware(char* firmware_filename);
 
 /**
  * @brief dump firmware to file
@@ -74,4 +74,4 @@ unsigned char lt6911uxe_update_main_firmware(unsigned char* firmware_filename);
  * @param filename file to save firmware
  * @return unsigned char ErrorCode
  */
-unsigned char lt6911uxe_dump_firmware(unsigned char* filename);
+unsigned char lt6911uxe_dump_firmware(char* filename);
