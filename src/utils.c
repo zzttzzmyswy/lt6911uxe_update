@@ -1,8 +1,8 @@
 #include "lt6911uxe_i2c.h"
 
 static unsigned char calculate_crc8(unsigned char* data, size_t length) {
-  unsigned char crc = 0x00;   // Initial CRC value
-  unsigned char poly = 0x07;  // CRC-8 polynomial
+  unsigned char crc = 0x00;   // Initial CRC value for LT6911UXE
+  unsigned char poly = 0x31;  // CRC-8 polynomial for LT6911UXE
 
   for (size_t i = 0; i < length; i++) {
     crc ^= data[i];  // XOR-in the next input byte
